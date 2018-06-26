@@ -1,49 +1,39 @@
-import React, { Component } from 'react';
-import ListContacts from './ListContacts';
-import { Route } from 'react-router-dom';
-import CreateContact from './CreateContact';
-import * as ContactsAPI from './utils/ContactsAPI';
+import React from 'react'
+import Search from './Search';
+import Library from './Library';
+import * as BooksAPI from './BooksAPI'
+import {Route} from 'react-router-dom'
+import './App.css'
 
+class BooksApp extends React.Component {
+  state = {
+    /**
+     * TODO: Instead of using this state variable to keep track of which page
+     * we're on, use the URL in the browser's address bar. This will ensure that
+     * users can use the browser's back and forward buttons to navigate between
+     * pages, as well as provide a good URL they can bookmark and share.
+     */
+     data: [],
 
-class App extends Component {
-state = {
-  contacts: []
- }
+  }
   componentDidMount() {
-    ContactsAPI.getAll().then((contacts) => {
-      this.setState({ contacts })
-    })}
-removeContact = (contact) => {
+     BooksAPI.getAll().then(data => {
+       this.setState({data});
+     });
+   }
 
-    this.setState((state) => ({
-   contacts: state.contacts.filter((c) => c.id !== contact.id)}))
-   ContactsAPI.remove(contact)
-}
-  createContact(contact) {
-    ContactsAPI.create(contact).then(contact => {
-      this.setState(state => ({
-        contacts: state.contacts.concat([ contact ])
-      }))
-    })
+   onChange = ( Book, Shelf ) => {
+      Book.shelf = Shelf
+      this.setState(updated=> ({data:this.state.data.filter( book => book.id !== Book.id ).concat([Book])
+}))
+BooksAPI.update(Book, Shelf)
   }
 
-  render(){
-return (<div>
- <Route exact path='/' render={() => (
-          <ListContacts
-            onDeleteContact={this.removeContact}
-            contacts={this.state.contacts}
-          />
-        )} />
-<Route path='/create' render={({ history }) => (
-            <CreateContact
-            onCreateContact={(contact) => {
-              this.createContact(contact)
-              history.push('/')
-                          }}
-          />
-        )}/>
-  </div>)
-
-}}
-export default App;
+  render() {
+    return (
+      <div className="app">
+      <Route exact  path="/Search"  render={()=>(<Search data={ this.state.data }  onChange ={this.onChange }/>)}/>
+      <Route   path="/" exact  render={()=>(<Library data={ this.state.data } onChange ={this.onChange}/>)}/>
+      </div>
+)}}
+export default BooksApp
